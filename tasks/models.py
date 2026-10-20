@@ -13,7 +13,12 @@ class Category(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     class Meta:
+        db_table = "task_manager_category"
+        verbose_name = "Category"
         verbose_name_plural = "Categories"
+        constraints = [
+            models.UniqueConstraint(fields=["name"], name="unique_category_name")
+        ]
 
     def __str__(self):
         return self.name
@@ -30,6 +35,14 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    class Meta:
+        db_table = "task_manager_task"
+        ordering = ['-created_at']
+        verbose_name = "Task"
+        constraints = [
+            models.UniqueConstraint(fields=["title", "deadline"], name="unique_task_title_per_deadline")
+        ]
+
 
 class SubTask(models.Model):
     title = models.CharField(max_length=200)
@@ -41,3 +54,11 @@ class SubTask(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.task.title})"
+
+    class Meta:
+        db_table = "task_manager_subtask"
+        ordering = ['-created_at']
+        verbose_name = "Subtask"
+        constraints = [
+            models.UniqueConstraint(fields=["title"], name="unique_subtask_title_per_task")
+        ]
