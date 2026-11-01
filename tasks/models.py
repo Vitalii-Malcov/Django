@@ -40,7 +40,7 @@ class Task(models.Model):
         ordering = ['-created_at']
         verbose_name = "Task"
         constraints = [
-            models.UniqueConstraint(fields=["title", "deadline"], name="unique_task_title_per_deadline")
+            models.UniqueConstraint(fields=["title"], name="unique_task_title")
         ]
 
 
@@ -53,12 +53,12 @@ class SubTask(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.title} ({self.task.title})"
+        return self.title
 
     class Meta:
         db_table = "task_manager_subtask"
         ordering = ['-created_at']
         verbose_name = "Subtask"
         constraints = [
-            models.UniqueConstraint(fields=["title"], name="unique_subtask_title_per_task")
+            models.UniqueConstraint(fields=["title"], name="unique_subtask_title")
         ]
