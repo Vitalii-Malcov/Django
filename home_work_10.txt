@@ -1,0 +1,91 @@
+PS E:\Projects\Django> python manage.py makemigrations
+Migrations for 'tasks':
+  tasks\migrations\0002_alter_category_options_alter_subtask_options_and_more.py
+    ~ Change Meta options on category
+    ~ Change Meta options on subtask
+    ~ Change Meta options on task
+    + Create constraint unique_category_name on model category
+    + Create constraint unique_subtask_title_per_task on model subtask
+    + Create constraint unique_task_title_per_deadline on model task
+    ~ Rename table for category to task_manager_category
+    ~ Rename table for subtask to task_manager_subtask
+    ~ Rename table for task to task_manager_task
+
+
+PS E:\Projects\Django> python manage.py migrate
+Operations to perform:
+  Apply all migrations: admin, auth, contenttypes, sessions, tasks
+Running migrations:
+  Applying contenttypes.0001_initial... OK
+  Applying auth.0001_initial... OK
+  Applying admin.0001_initial... OK
+  Applying admin.0002_logentry_remove_auto_add... OK
+  Applying admin.0003_logentry_add_action_flag_choices... OK
+  Applying contenttypes.0002_remove_content_type_name... OK
+  Applying auth.0002_alter_permission_name_max_length... OK
+  Applying auth.0003_alter_user_email_max_length... OK
+  Applying auth.0004_alter_user_username_opts... OK
+  Applying auth.0005_alter_user_last_login_null... OK
+  Applying auth.0006_require_contenttypes_0002... OK
+  Applying auth.0007_alter_validators_add_error_messages... OK
+  Applying auth.0008_alter_user_username_max_length... OK
+  Applying auth.0009_alter_user_last_name_max_length... OK
+  Applying auth.0010_alter_group_name_max_length... OK
+  Applying auth.0011_update_proxy_permissions... OK
+  Applying auth.0012_alter_user_first_name_max_length... OK
+  Applying sessions.0001_initial... OK
+  Applying tasks.0001_initial... OK
+  Applying tasks.0002_alter_category_options_alter_subtask_options_and_more... OK
+
+
+PS E:\Projects\Django> python .\manage.py createsuperuser
+Username (leave blank to use 'v'): vitalii003
+Email address:
+Password:
+Password (again):
+Error: Your passwords didn't match.
+Password:
+Password (again):
+This password is too short. It must contain at least 8 characters.
+This password is too common.
+This password is entirely numeric.
+Bypass password validation and create user anyway? [y/N]: y
+Superuser created successfully.
+
+
+PS E:\Projects\Django> python .\manage.py runserver
+Watching for file changes with StatReloader
+Performing system checks...
+
+System check identified no issues (0 silenced).
+November 01, 2026 - 11:40:05
+Django version 6.1.1, using settings 'config.settings'
+Starting WSGI development server at http://127.0.0.1:8000/
+Quit the server with CTRL-BREAK.
+
+WARNING: This is a development server. Do not use it in a production setting. Use a production WSGI or ASGI server instead.
+For more information on production servers see: https://docs.djangoproject.com/en/6.1/howto/deployment/
+Not Found: /
+[01/Nov/2026 11:40:08] "GET / HTTP/1.1" 404 2482
+Not Found: /favicon.ico
+[01/Nov/2026 11:40:08] "GET /favicon.ico HTTP/1.1" 404 2533
+Not Found: /ui
+[01/Nov/2026 11:40:32] "GET /ui HTTP/1.1" 404 2506
+[01/Nov/2026 11:40:39] "GET /admin HTTP/1.1" 301 0
+[01/Nov/2026 11:40:39] "GET /admin/ HTTP/1.1" 302 0
+[01/Nov/2026 11:40:39] "GET /admin/login/?next=/admin/ HTTP/1.1" 200 4307
+[01/Nov/2026 11:40:39] "GET /static/admin/css/base.css HTTP/1.1" 200 24538
+[01/Nov/2026 11:40:39] "GET /static/admin/css/login.css HTTP/1.1" 200 951
+[01/Nov/2026 11:40:39] "GET /static/admin/css/dark_mode.css HTTP/1.1" 200 3583
+[01/Nov/2026 11:40:39] "GET /static/admin/css/nav_sidebar.css HTTP/1.1" 200 2814
+[01/Nov/2026 11:40:39] "GET /static/admin/css/responsive.css HTTP/1.1" 200 15025
+[01/Nov/2026 11:40:39] "GET /static/admin/js/theme.js HTTP/1.1" 200 1708
+[01/Nov/2026 11:40:39] "GET /static/admin/js/nav_sidebar.js HTTP/1.1" 200 3208
+[01/Nov/2026 11:40:48] "POST /admin/login/?next=/admin/ HTTP/1.1" 302 0
+[01/Nov/2026 11:40:48] "GET /admin/ HTTP/1.1" 200 8360
+[01/Nov/2026 11:40:48] "GET /static/admin/css/dashboard.css HTTP/1.1" 200 442
+[01/Nov/2026 11:40:48] "GET /static/admin/img/icon-addlink.svg HTTP/1.1" 200 593
+[01/Nov/2026 11:40:48] "GET /static/admin/img/icon-changelink.svg HTTP/1.1" 200 978
+
+
+
