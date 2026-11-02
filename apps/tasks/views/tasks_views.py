@@ -1,15 +1,18 @@
 from django.db.models import Count
 from django.http import JsonResponse
 from django.utils import timezone
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework.decorators import api_view
-from rest_framework.generics import get_object_or_404
+from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.tasks.models import Task
-from apps.tasks.serializers import TaskSerializer
+from apps.tasks.serializers import TaskSerializer, TaskDetailSerializer
 
 
 @api_view(['GET'])
@@ -34,48 +37,42 @@ WEEKDAYS = {
 }
 
 
-# Создание задачи (POST) и список задач (GET) с фильтром по дню недели
-class TaskListCreateAPIView(APIView):
-    def get_objects(self):
-        return Task.objects.all()
+# Задание 1: создание и список задач (Generic View)
+class TaskListCreateAPIView(ListCreateAPIView):
+    serializer_class = TaskSerializer
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    # Фильтрация: ?status=new, ?due_date__gte=2026-11-01, ?due_date__lte=2026-11-30
+    # (due_date — это "deadline" из задания)
+    filterset_fields = {
+        'status': ['exact'],
+        'due_date': ['exact', 'gte', 'lte'],
+    }
+    # Поиск: ?search=отчёт
+    search_fields = ['title', 'description']
+    # Сортировка: ?ordering=created_at или ?ordering=-created_at
+    ordering_fields = ['created_at']
 
-    def get(self, request: Request) -> Response:
-        tasks = self.get_objects()
+    def get_queryset(self):
+        queryset = Task.objects.all()
 
-        # ?day=вторник — только задачи, у которых срок (due_date) выпадает на этот день недели.
-        # Без параметра — все задачи.
-        day = request.query_params.get('day')
+        # Из прошлой домашки: ?day=вторник — задачи со сроком в этот день недели
+        day = self.request.query_params.get('day')
         if day:
             week_day = WEEKDAYS.get(day.strip().lower())
             if week_day is None:
-                return Response(
-                    {'error': f'Неизвестный день недели: {day}'},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            tasks = tasks.filter(due_date__week_day=week_day)
+                raise ValidationError({'day': f'Неизвестный день недели: {day}'})
+            queryset = queryset.filter(due_date__week_day=week_day)
 
-        serializer = TaskSerializer(tasks, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    def post(self, request: Request) -> Response:
-        serializer = TaskSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return queryset
 
 
-# Задание 2: получение конкретной задачи по её ID (UUID)
-class TaskDetailAPIView(APIView):
-    def get_object(self, pk):
-        return get_object_or_404(Task, pk=pk)
-
-    def get(self, request: Request, pk) -> Response:
-        task = self.get_object(pk)
-        serializer = TaskSerializer(task)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+# Задание 1: получение, обновление и удаление задачи (Generic View)
+class TaskDetailAPIView(RetrieveUpdateDestroyAPIView):
+    queryset = Task.objects.all()
+    serializer_class = TaskDetailSerializer
 
 
-# Задание 3: статистика задач
+# Статистика задач — оставлена как есть
 class TaskStatsAPIView(APIView):
     def get(self, request: Request) -> Response:
         # Общее количество задач
