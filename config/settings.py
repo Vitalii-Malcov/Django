@@ -154,3 +154,72 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+
+# REST framework: глобальная курсорная пагинация
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'apps.core.pagination.DefaultCursorPagination',
+    'PAGE_SIZE': 6,
+}
+
+
+# ---------- Логирование ----------
+LOGS_DIR = BASE_DIR / 'logs'
+LOGS_DIR.mkdir(exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} | {levelname} | {name} | {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        # Работа сервера — в консоль
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        # HTTP-запросы и их статусы — в logs/http_logs.log
+        'http_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'http_logs.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+        # SQL-запросы к базе — в logs/db_logs.log
+        'db_file': {
+            'class': 'logging.FileHandler',
+            'filename': LOGS_DIR / 'db_logs.log',
+            'formatter': 'verbose',
+            'encoding': 'utf-8',
+        },
+    },
+    'loggers': {
+        # Общие логи Django (запуск, перезагрузка, предупреждения) — консоль
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        # Каждый запрос к runserver: метод, путь, статус — консоль и http_logs.log
+        'django.server': {
+            'handlers': ['console', 'http_file'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Ошибки обработки запросов (4xx/5xx с подробностями) — http_logs.log (и консоль через 'django')
+        'django.request': {
+            'handlers': ['http_file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        # SQL-запросы (Django пишет их только при DEBUG = True) — только db_logs.log
+        'django.db.backends': {
+            'handlers': ['db_file'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
+}

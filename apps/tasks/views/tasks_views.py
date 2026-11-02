@@ -51,6 +51,7 @@ class TaskListCreateAPIView(ListCreateAPIView):
     search_fields = ['title', 'description']
     # Сортировка: ?ordering=created_at или ?ordering=-created_at
     ordering_fields = ['created_at']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         queryset = Task.objects.all()
