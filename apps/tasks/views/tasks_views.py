@@ -22,13 +22,38 @@ def get_task_by_project_name(request: Request, name: str):
         return JsonResponse({'error': 'Task not found'}, status=status.HTTP_404_NOT_FOUND)
 
 
-# Задание 1 и 2: создание задачи (POST) и список задач (GET)
+# Номера дней недели для лукапа __week_day в Django: 1 = воскресенье ... 7 = суббота
+WEEKDAYS = {
+    'воскресенье': 1, 'sunday': 1,
+    'понедельник': 2, 'monday': 2,
+    'вторник': 3, 'tuesday': 3,
+    'среда': 4, 'wednesday': 4,
+    'четверг': 5, 'thursday': 5,
+    'пятница': 6, 'friday': 6,
+    'суббота': 7, 'saturday': 7,
+}
+
+
+# Создание задачи (POST) и список задач (GET) с фильтром по дню недели
 class TaskListCreateAPIView(APIView):
     def get_objects(self):
         return Task.objects.all()
 
     def get(self, request: Request) -> Response:
         tasks = self.get_objects()
+
+        # ?day=вторник — только задачи, у которых срок (due_date) выпадает на этот день недели.
+        # Без параметра — все задачи.
+        day = request.query_params.get('day')
+        if day:
+            week_day = WEEKDAYS.get(day.strip().lower())
+            if week_day is None:
+                return Response(
+                    {'error': f'Неизвестный день недели: {day}'},
+                    status=status.HTTP_400_BAD_REQUEST,
+                )
+            tasks = tasks.filter(due_date__week_day=week_day)
+
         serializer = TaskSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
