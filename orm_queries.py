@@ -2,7 +2,7 @@
 Домашнее задание: Проект "Менеджер задач" — ORM запросы (CRUD для Task и SubTask).
 
 Запуск (PowerShell):
-    Get-Content orm_queries.py -Encoding UTF8 | python manage.py shell
+    python manage.py shell -c "exec(open('orm_queries.py', encoding='utf-8').read())"
 """
 from datetime import timedelta
 
