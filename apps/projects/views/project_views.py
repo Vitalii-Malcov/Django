@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,7 @@ from apps.projects.serializers import (
 
 
 class ProjectsListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get_objects(self, date_from=None, date_to=None):
         projects = Project.objects.all()
@@ -45,6 +47,8 @@ class ProjectsListAPIView(APIView):
 
 
 class ProjectDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get_object(self, pk):
         return get_object_or_404(Project, pk=pk)
 

@@ -1,6 +1,7 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
 
 from apps.tasks.models import SubTask
 from apps.tasks.serializers import SubTaskCreateSerializer
@@ -9,6 +10,7 @@ from apps.tasks.serializers import SubTaskCreateSerializer
 # Задание 2: создание и список подзадач (Generic View)
 class SubTaskListCreateView(ListCreateAPIView):
     serializer_class = SubTaskCreateSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     # Фильтрация: ?status=new, ?due_date__gte=2026-11-01, ?due_date__lte=2026-11-30
     filterset_fields = {
@@ -36,3 +38,9 @@ class SubTaskListCreateView(ListCreateAPIView):
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskCreateSerializer
+
+    # Удалять может только админ
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        return [IsAuthenticatedOrReadOnly()]

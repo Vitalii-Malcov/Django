@@ -3,10 +3,11 @@ from django.http import JsonResponse
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,7 @@ from apps.tasks.serializers import TaskSerializer, TaskDetailSerializer
 
 
 @api_view(['GET'])
+@permission_classes([IsAuthenticatedOrReadOnly])
 def get_task_by_project_name(request: Request, name: str):
     try:
         task = Task.objects.filter(project__title=name)
@@ -40,6 +42,7 @@ WEEKDAYS = {
 # Задание 1: создание и список задач (Generic View)
 class TaskListCreateAPIView(ListCreateAPIView):
     serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     # Фильтрация: ?status=new, ?due_date__gte=2026-11-01, ?due_date__lte=2026-11-30
     # (due_date — это "deadline" из задания)
@@ -72,9 +75,17 @@ class TaskDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
 
+    # Удалять может только админ
+    def get_permissions(self):
+        if self.request.method == 'DELETE':
+            return [IsAdminUser()]
+        return [IsAuthenticatedOrReadOnly()]
+
 
 # Статистика задач — оставлена как есть
 class TaskStatsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request: Request) -> Response:
         # Общее количество задач
         total_tasks = Task.objects.count()

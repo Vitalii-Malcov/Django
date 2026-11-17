@@ -1,5 +1,6 @@
 from django.db.models import Count
 from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
@@ -13,6 +14,7 @@ class CategoryViewSet(ModelViewSet):
     # Category.objects — менеджер без "удалённых" категорий
     queryset = Category.objects.all()
     serializer_class = CategoryCreateSerializer
+    permission_classes = [IsAuthenticated]
 
     # GET .../categories/count_tasks/ — количество задач в каждой категории
     @action(detail=False, methods=['get'])
