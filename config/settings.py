@@ -160,6 +160,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+DEFAULT_FROM_EMAIL = 'noreply@taskmanager.local'
 
 
 # REST framework: глобальная курсорная пагинация

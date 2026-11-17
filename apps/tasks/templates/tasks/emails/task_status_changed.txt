@@ -1,0 +1,8 @@
+Здравствуйте, {{ task.owner.username }}!
+
+Статус задачи «{{ task.title }}» изменился.
+Было: {{ old_status }}
+Стало: {{ task.get_status_display }}
+{% if is_done %}
+Задача закрыта.
+{% endif %}
