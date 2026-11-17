@@ -6,13 +6,14 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticated, IsAuthenticatedOrReadOnly
+from rest_framework.generics import ListAPIView, ListCreateAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from apps.tasks.models import Task
+from apps.tasks.permissions import IsOwnerOrReadOnly
 from apps.tasks.serializers import TaskSerializer, TaskDetailSerializer
 
 
@@ -69,17 +70,24 @@ class TaskListCreateAPIView(ListCreateAPIView):
 
         return queryset
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+# Мои задачи: только задачи текущего пользователя
+class MyTasksListAPIView(ListAPIView):
+    serializer_class = TaskSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        return Task.objects.filter(owner=self.request.user)
+
 
 # Задание 1: получение, обновление и удаление задачи (Generic View)
 class TaskDetailAPIView(RetrieveUpdateDestroyAPIView):
     queryset = Task.objects.all()
     serializer_class = TaskDetailSerializer
-
-    # Удалять может только админ
-    def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        return [IsAuthenticatedOrReadOnly()]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
 
 # Статистика задач — оставлена как есть

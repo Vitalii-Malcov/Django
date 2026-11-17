@@ -7,10 +7,12 @@ from apps.tasks.serializers.subtask_serializers import SubTaskSerializer
 
 
 class TaskSerializer(ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
     class Meta:
         model = Task
         # due_date — это и есть "deadline" из задания; project обязателен в модели
-        fields = ['id', 'title', 'description', 'status', 'priority', 'project', 'due_date', 'created_at']
+        fields = ['id', 'title', 'description', 'status', 'priority', 'project', 'due_date', 'created_at', 'owner']
         read_only_fields = ['id', 'created_at']
 
 
@@ -18,11 +20,12 @@ class TaskSerializer(ModelSerializer):
 class TaskDetailSerializer(ModelSerializer):
     # related_name="subtasks" в модели SubTask
     subtasks = SubTaskSerializer(many=True, read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'status', 'priority', 'project', 'due_date',
-                  'created_at', 'subtasks']
+                  'created_at', 'subtasks', 'owner']
 
 
 # Задание 4: дедлайн не может быть в прошлом

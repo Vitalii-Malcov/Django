@@ -30,6 +30,8 @@ class Task(UUIDv7Model, TimeStampedModel):
     tag = models.ManyToManyField("Tag", related_name="tasks", blank=True)
     due_date = models.DateTimeField()
     assignee = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="tasks")
+    # Владелец задачи; null=True, потому что в базе есть задачи без владельца
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="owned_tasks", null=True, blank=True)
 
     class Meta:
         db_table = "task_manager_task"

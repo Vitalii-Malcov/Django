@@ -1,9 +1,10 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter, SearchFilter
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.permissions import IsAdminUser, IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from apps.tasks.models import SubTask
+from apps.tasks.permissions import IsOwnerOrReadOnly
 from apps.tasks.serializers import SubTaskCreateSerializer
 
 
@@ -33,14 +34,12 @@ class SubTaskListCreateView(ListCreateAPIView):
 
         return queryset
 
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
 
 # Задание 2: получение, обновление и удаление подзадачи (Generic View)
 class SubTaskDetailUpdateDeleteView(RetrieveUpdateDestroyAPIView):
     queryset = SubTask.objects.all()
     serializer_class = SubTaskCreateSerializer
-
-    # Удалять может только админ
-    def get_permissions(self):
-        if self.request.method == 'DELETE':
-            return [IsAdminUser()]
-        return [IsAuthenticatedOrReadOnly()]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]

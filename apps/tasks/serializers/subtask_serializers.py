@@ -6,10 +6,11 @@ from apps.tasks.models import SubTask
 # Задание 1: created_at переопределено как поле только для чтения
 class SubTaskCreateSerializer(serializers.ModelSerializer):
     created_at = serializers.DateTimeField(read_only=True)
+    owner = serializers.ReadOnlyField(source='owner.username')
 
     class Meta:
         model = SubTask
-        fields = ['id', 'title', 'description', 'task', 'status', 'due_date', 'created_at']
+        fields = ['id', 'title', 'description', 'task', 'status', 'due_date', 'created_at', 'owner']
 
 
 # Задание 3: сериализатор подзадачи для вложения в TaskDetailSerializer

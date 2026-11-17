@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from apps.core.models.base import TimeStampedModel, UUIDv7Model
@@ -10,6 +11,7 @@ class SubTask(UUIDv7Model, TimeStampedModel):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="subtasks")
     status = models.CharField(max_length=20, choices=Task.Status.choices, default=Task.Status.NEW)
     due_date = models.DateTimeField()
+    owner = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="subtasks", null=True, blank=True)
 
     class Meta:
         db_table = "task_manager_subtask"
